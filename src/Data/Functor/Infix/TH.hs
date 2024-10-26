@@ -12,7 +12,7 @@ module Data.Functor.Infix.TH
 
 import Control.Applicative ((<$>), (<*>), pure)
 import Control.Monad (replicateM)
-import Language.Haskell.TH (Q, Exp(..), Type(..), Dec(..), Pat(..), TyVarBndr(..), Pred(..), Body(..), newName, mkName, Fixity(..), FixityDirection(..))
+import Language.Haskell.TH (Q, Exp(..), Type(..), Dec(..), Pat(..), TyVarBndr(..), Pred(..), Body(..), newName, mkName, Fixity(..), FixityDirection(..), Specificity(..))
 
 (~>) :: Type -> Type -> Type
 x ~> y = AppT ArrowT x `AppT` y
@@ -21,7 +21,7 @@ infixr 0 ~>
 fmapTypeOfDegree :: Int -> Q Type
 fmapTypeOfDegree n = do
   names@(a:b:fs) <- (mkName "a":) <$> (mkName "b":) <$> replicateM n (newName "f")
-  let variables = map PlainTV names
+  let variables = [PlainTV n SpecifiedSpec | n <- names]
 #if MIN_VERSION_template_haskell(2,10,0)
       constraints = AppT (ConT $ mkName "Functor") . VarT <$> fs
 #else
